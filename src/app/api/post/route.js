@@ -1,30 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from 'fs';
-const domain = process.env.DOMAIN;
+import { PrismaClient } from "@prisma/client";
+
+const prismaClient = new PrismaClient();
 
 
 export async function GET(request) {
-  const file = await fs.readFile( '/dt.json', 'utf8');
+  const data = await prismaClient.user.findMany();
 
   return Response.json({
     success: true,
-    data: JSON.parse(file)
+    data: data
   });  
 }
 
 export async function POST(request) {
   const res = await request.json();
-  const file = await fs.readFile( '/dt.json', 'utf8');
-
-  let msg = JSON.parse(file);
-  msg.push({
+  
+  let user = {
     success: res.result,
-    date: new Date()    
-  })
-
-  await fs.writeFile( '/dt.json', JSON.stringify(msg), 'utf8');
+    date: "" +  new Date()    
+  }
+  
+  const data = await prismaClient.user.create({ data: user });
   return Response.json({
     success: true,
-    data: file,
+    data: data,
   });
 }
